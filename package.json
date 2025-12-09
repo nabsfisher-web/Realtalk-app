@@ -1,5 +1,6 @@
 {
-  "name": "realtalk-app",
+  "name": "realtalk
+",
   "version": "1.0.0",
   "description": "RealTalk - AI tone & style rewriter",
   "main": "index.js",
