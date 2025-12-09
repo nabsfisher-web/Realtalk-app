@@ -1,0 +1,14 @@
+{
+  "name": "realtalk",
+  "version": "1.0.0",
+  "description": "RealTalk - AI tone & style rewriter",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "openai": "^4.52.0"
+  }
+}

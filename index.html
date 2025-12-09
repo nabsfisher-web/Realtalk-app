@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RealTalk – Message Rewriter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #050509;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: #11111a;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+    p.subtitle {
+      font-size: 0.9rem;
+      color: #a0a0b8;
+      margin-top: 0;
+    }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      border-radius: 10px;
+      border: 1px solid #33334a;
+      padding: 10px;
+      background: #050509;
+      color: #fff;
+      resize: vertical;
+      font-size: 0.95rem;
+    }
+    select, button {
+      margin-top: 10px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.9rem;
+    }
+    select {
+      background: #050509;
+      color: #ffffff;
+      border: 1px solid #33334a;
+    }
+    button.main-btn {
+      background: #4f7dff;
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.main-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .status {
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: #a0a0b8;
+    }
+    .output {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #050509;
+      border: 1px solid #33334a;
+      font-size: 0.93rem;
+    }
+    .output-placeholder {
+      font-size: 0.9rem;
+      color: #777794;
+    }
+    .variants {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .variant {
+      padding: 10px;
+      border-radius: 10px;
+      background: #151520;
+      border: 1px solid #27273a;
+    }
+    .variant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .variant-label {
+      font-size: 0.85rem;
+      color: #a0a0b8;
+    }
+    .variant-text {
+      margin: 0;
+      font-size: 0.93rem;
+    }
+    .chip-btn,
+    .copy-small {
+      border-radius: 999px;
+      border: none;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      background: #2b2b46;
+      color: #ffffff;
+      cursor: pointer;
+    }
+    .chip-btn:active,
+    .copy-small:active {
+      transform: scale(0.97);
+    }
+    .history {
+      margin-top: 22px;
+      border-top: 1px solid #27273a;
+      padding-top: 14px;
+    }
+    .history-title {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      color: #d0d0f5;
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .history-item {
+      padding: 8px;
+      border-radius: 10px;
+      background: #151520;
+      border: 1px solid #27273a;
+      font-size: 0.82rem;
+    }
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      color: #a0a0b8;
+    }
+    .history-message {
+      margin: 0;
+      color: #e0e0ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>RealTalk</h1>
+    <p class="subtitle">Paste any message, choose a tone & style, and get 3 better versions.</p>
+
+    <!-- Quick templates row -->
+    <div style="margin-bottom: 8px; display:flex; flex-wrap:wrap; gap:6px; font-size:0.8rem; align-items:center;">
+      <span style="opacity:0.8;">Quick templates:</span>
+      <button type="button" class="chip-btn template-btn" data-text="Hi, I won't be able to make it tomorrow, can we reschedule?">
+        Reschedule
+      </button>
+      <button type="button" class="chip-btn template-btn" data-text="Hi, I'd like to follow up regarding my job application. Is there any update you can share?">
+        Job follow-up
+      </button>
+      <button type="button" class="chip-btn template-btn" data-text="Hey, I really appreciate you, thank you for always supporting me.">
+        Appreciation
+      </button>
+      <button type="button" class="chip-btn template-btn" data-text="Hi, I received my order but there was a problem. Can you help me sort this out?">
+        Complaint
+      </button>
+    </div>
+
+    <label for="message">Your message</label>
+    <textarea id="message" placeholder="Type or paste your message here..."></textarea>
+
+    <div class="controls">
+      <select id="tone">
+        <option value="Confident">😎 Confident</option>
+        <option value="Polite">😇 Polite</option>
+        <option value="Professional" selected>💼 Professional</option>
+        <option value="Romantic">💘 Romantic</option>
+        <option value="Funny">😂 Funny</option>
+        <option value="Savage">🧊 Savage</option>
+        <option value="Calm">🕊️ Calm</option>
+      </select>
+
+      <select id="style">
+        <option value="Default">✨ Normal length</option>
+        <option value="Shorter">✂️ Shorter</option>
+        <option value="Longer">📜 Longer, more detailed</option>
+        <option value="More direct">🎯 More direct / assertive</option>
+        <option value="Softer">🌸 Softer / gentler</option>
+        <option value="More emotional">💔 More emotional</option>
+        <option value="Stronger">💥 Stronger impact</option>
+      </select>
+
+      <button id="rewriteBtn" class="main-btn">Rewrite</button>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="output" id="output">
+      <div class="output-placeholder">
+        Your rewrites will appear here.
+      </div>
+      <div id="variants" class="variants"></div>
+    </div>
+
+    <!-- Learn My Style Section -->
+    <div class="style-section" style="margin-top:25px; padding-top:20px; border-top:1px solid #27273a;">
+      <h3 style="margin:0 0 8px 0; font-size:1rem; color:#d0d0f5;">Learn My Writing Style</h3>
+      <p style="font-size:0.85rem; color:#a0a0b8; margin-top:0;">
+        Paste 2–5 examples of how YOU naturally text or write. RealTalk will learn your personal style and match it.
+      </p>
+
+      <textarea id="styleSamples" placeholder="Paste your writing examples here..." style="
+        width:100%; min-height:120px; margin-top:8px; border-radius:10px; background:#050509; border:1px solid #33334a; color:#ffffff; padding:10px;"></textarea>
+
+      <button id="saveStyleBtn" class="main-btn" style="margin-top:10px;">
+        Save My Style
+      </button>
+
+      <p id="styleStatus" style="margin-top:8px; font-size:0.8rem; color:#a0a0b8;">
+        No style saved yet.
+      </p>
+    </div>
+
+    <div class="history" id="history">
+      <div class="history-title">Recent rewrites</div>
+      <div id="historyList" class="history-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById("rewriteBtn");
+    const statusEl = document.getElementById("status");
+    const variantsEl = document.getElementById("variants");
+    const outputEl = document.getElementById("output");
+    const historyListEl = document.getElementById("historyList");
+    const messageInput = document.getElementById("message");
+    const styleSamples = document.getElementById("styleSamples");
+    const saveStyleBtn = document.getElementById("saveStyleBtn");
+    const styleStatus = document.getElementById("styleStatus");
+
+    const historyItems = [];
+
+    // Load existing personal style from localStorage
+    let userStyle = localStorage.getItem("realtalk_user_style") || "";
+    if (userStyle) {
+      styleSamples.value = userStyle;
+      styleStatus.textContent = "Your writing style is saved. New rewrites will try to match it. ✔";
+    }
+
+    function saveUserStyle(styleText) {
+      userStyle = styleText.trim();
+      localStorage.setItem("realtalk_user_style", userStyle);
+    }
+
+    function renderVariants(rawText) {
+      variantsEl.innerHTML = "";
+      const placeholder = outputEl.querySelector(".output-placeholder");
+      if (placeholder) placeholder.style.display = "none";
+
+      if (!rawText) {
+        variantsEl.innerHTML = "";
+        return [];
+      }
+
+      const lines = rawText
+        .split("\n")
+        .map(l => l.trim())
+        .filter(Boolean);
+
+      let variantLines = lines.filter(l => /^\d+\./.test(l));
+
+      if (!variantLines.length) {
+        variantLines = [rawText];
+      }
+
+      const variants = variantLines.map(text =>
+        text.replace(/^\d+\.\s*/, "")
+      );
+
+      variants.forEach((text, idx) => {
+        const card = document.createElement("div");
+        card.className = "variant";
+        card.innerHTML = `
+          <div class="variant-header">
+            <span class="variant-label">Option ${idx + 1}</span>
+            <button class="copy-small" data-text="${text.replace(/"/g, "&quot;")}">Copy</button>
+          </div>
+          <p class="variant-text">${text}</p>
+        `;
+        variantsEl.appendChild(card);
+      });
+
+      variantsEl.querySelectorAll(".copy-small").forEach(btnEl => {
+        btnEl.addEventListener("click", () => {
+          const text = btnEl.getAttribute("data-text");
+          if (!navigator.clipboard) {
+            statusEl.textContent = "Copied text (select & paste manually) ✅";
+            return;
+          }
+          navigator.clipboard.writeText(text)
+            .then(() => {
+              statusEl.textContent = "Copied ✅";
+            })
+            .catch(() => {
+              statusEl.textContent = "Could not copy automatically.";
+            });
+        });
+      });
+
+      return variants;
+    }
+
+    function renderHistory() {
+      historyListEl.innerHTML = "";
+
+      if (!historyItems.length) {
+        historyListEl.innerHTML = "<div class='history-item'>No history yet.</div>";
+        return;
+      }
+
+      historyItems.forEach(item => {
+        const { message, tone, variants, time } = item;
+        const el = document.createElement("div");
+        el.className = "history-item";
+        el.innerHTML = `
+          <div class="history-meta">
+            <span>${tone}</span>
+            <span>${new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+          <p class="history-message">${message}</p>
+          <p class="history-message" style="opacity:0.8; margin-top:4px;">
+            First option: ${variants[0] || ""}
+          </p>
+        `;
+        historyListEl.appendChild(el);
+      });
+    }
+
+    function addToHistory(message, tone, variants) {
+      historyItems.unshift({
+        message,
+        tone,
+        variants,
+        time: Date.now(),
+      });
+      if (historyItems.length > 5) {
+        historyItems.pop();
+      }
+      renderHistory();
+    }
+
+    // Initial history state
+    renderHistory();
+
+    // Template buttons
+    document.querySelectorAll(".template-btn").forEach(tBtn => {
+      tBtn.addEventListener("click", () => {
+        const text = tBtn.getAttribute("data-text") || "";
+        messageInput.value = text;
+        statusEl.textContent = "Template loaded. You can tweak it or hit Rewrite.";
+      });
+    });
+
+    // Save writing style
+    saveStyleBtn.addEventListener("click", () => {
+      const samples = styleSamples.value.trim();
+
+      if (samples.length < 40) {
+        styleStatus.textContent = "Please enter more writing so RealTalk can learn your style.";
+        return;
+      }
+
+      saveUserStyle(samples);
+      styleStatus.textContent = "Your writing style has been saved! ✔";
+    });
+
+    btn.addEventListener("click", async () => {
+      const message = messageInput.value.trim();
+      const tone = document.getElementById("tone").value;
+      const style = document.getElementById("style").value;
+
+      if (!message) {
+        alert("Please type a message first.");
+        return;
+      }
+
+      btn.disabled = true;
+      statusEl.textContent = "Rewriting...";
+      variantsEl.innerHTML = "";
+
+      try {
+        const res = await fetch("/api/rewrite", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message, tone, style, userStyle }),
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          statusEl.textContent = "Error: " + data.error;
+          btn.disabled = false;
+          return;
+        }
+
+        const variants = renderVariants(data.result || "");
+        statusEl.textContent = "Done ✅";
+        addToHistory(message, tone, variants);
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Something went wrong.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
